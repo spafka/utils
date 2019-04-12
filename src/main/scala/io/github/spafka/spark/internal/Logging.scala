@@ -97,9 +97,7 @@ trait Logging {
     initializeLogIfNecessary(isInterpreter, silent = false)
   }
 
-  protected def initializeLogIfNecessary(
-                                          isInterpreter: Boolean,
-                                          silent: Boolean = false): Boolean = {
+  protected def initializeLogIfNecessary(isInterpreter: Boolean, silent: Boolean = false): Boolean = {
     if (!Logging.initialized) {
       Logging.initLock.synchronized {
         if (!Logging.initialized) {
@@ -115,19 +113,16 @@ trait Logging {
     // Don't use a logger in here, as this is itself occurring during initialization of a logger
     // If Log4j 1.2 is being used, but is not initialized, load a default properties file
     if (Logging.isLog4j12()) {
-      val log4j12Initialized = LogManager.getRootLogger.getAllAppenders.hasMoreElements
-      // scalastyle:off println
+      val log4j12Initialized = LogManager.getRootLogger.getAllAppenders.hasMoreElements // scalastyle:off println
       if (!log4j12Initialized) {
         Logging.defaultSparkLog4jConfig = true
         val defaultLogProps = "org/apache/spark/log4j-defaults.properties"
         Option(Thread.currentThread().getContextClassLoader.getResource(defaultLogProps)) match {
-          case Some(url) =>
-            PropertyConfigurator.configure(url)
+          case Some(url) => PropertyConfigurator.configure(url)
             if (!silent) {
               System.err.println(s"Using Spark's default log4j profile: $defaultLogProps")
             }
-          case None =>
-            System.err.println(s"Spark was unable to load $defaultLogProps")
+          case None => System.err.println(s"Spark was unable to load $defaultLogProps")
         }
       }
 
@@ -144,13 +139,11 @@ trait Logging {
         if (replLevel != rootLogger.getEffectiveLevel()) {
           if (!silent) {
             System.err.printf("Setting default log level to \"%s\".\n", replLevel)
-            System.err.println("To adjust logging level use sc.setLogLevel(newLevel). " +
-              "For SparkR, use setLogLevel(newLevel).")
+            System.err.println("To adjust logging level use sc.setLogLevel(newLevel). " + "For SparkR, use setLogLevel(newLevel).")
           }
           rootLogger.setLevel(replLevel)
         }
-      }
-      // scalastyle:on println
+      } // scalastyle:on println
     }
     Logging.initialized = true
 
@@ -160,7 +153,7 @@ trait Logging {
   }
 }
 
- object Logging {
+object Logging {
   @volatile private var initialized = false
   @volatile private var defaultRootLevel: Level = null
   @volatile private var defaultSparkLog4jConfig = false
@@ -169,7 +162,7 @@ trait Logging {
   try {
     // We use reflection here to handle the case where users remove the
     // slf4j-to-jul bridge order to route their logs to JUL.
-    val bridgeClass =Class.forName("org.slf4j.bridge.SLF4JBridgeHandler")
+    val bridgeClass = Class.forName("org.slf4j.bridge.SLF4JBridgeHandler")
     bridgeClass.getMethod("removeHandlersForRootLogger").invoke(null)
     val installed = bridgeClass.getMethod("isInstalled").invoke(null).asInstanceOf[Boolean]
     if (!installed) {
