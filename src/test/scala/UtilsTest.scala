@@ -15,12 +15,13 @@ class UtilsTest {
     new A().log1()
 
   }
+
 }
 
 
 class A extends Logging {
 
   def log1() = {
-    logInfo(s"")
+    logInfo(s"三生三世")
   }
 }
