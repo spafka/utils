@@ -6,7 +6,7 @@
 
     <groupId>io.github.spafka</groupId>
     <artifactId>utils</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 
     <name>spafka-common-utils</name>
     <description>utis sdk</description>
@@ -333,8 +333,6 @@
                                     </excludes>
                                 </filter>
                             </filters>
-                            <!-- If you want to use ./bin/flink run <quickstart jar> uncomment the following lines.
-                            This will add a Main-Class entry to the manifest file -->
 
                             <transformers>
                                 <transformer
@@ -344,8 +342,7 @@
                             </transformers>
 
                             <finalName>
-                                <!--${project.artifactId}-${project.version}-${package.environment}_${timestamp} -->
-                                ${project.artifactId}-${project.version}-${package.environment}
+                                ${project.artifactId}-${project.version}-${timestamp}
                             </finalName>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                         </configuration>
