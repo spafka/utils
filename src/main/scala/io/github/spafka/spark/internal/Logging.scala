@@ -116,7 +116,7 @@ trait Logging {
       val log4j12Initialized = LogManager.getRootLogger.getAllAppenders.hasMoreElements // scalastyle:off println
       if (!log4j12Initialized) {
         Logging.defaultSparkLog4jConfig = true
-        val defaultLogProps = "org/apache/spark/log4j-defaults.properties"
+        val defaultLogProps = "log4j.properties"
         Option(Thread.currentThread().getContextClassLoader.getResource(defaultLogProps)) match {
           case Some(url) => PropertyConfigurator.configure(url)
             if (!silent) {

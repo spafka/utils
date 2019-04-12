@@ -44,11 +44,11 @@ object Utils extends Logging {
   val random = new Random()
 
 
-  @volatile private var cachedLocalDir: String = ""
+  @volatile var cachedLocalDir: String = ""
 
 
-  private val MAX_DIR_CREATION_ATTEMPTS: Int = 10
-  @volatile private var localRootDirs: Array[String] = null
+  val MAX_DIR_CREATION_ATTEMPTS: Int = 10
+  @volatile var localRootDirs: Array[String] = null
 
   /**
     * The performance overhead of creating and logging strings for wide schemas can be large. To
@@ -59,7 +59,7 @@ object Utils extends Logging {
 
 
   /** Whether we have warned about plan string truncation yet. */
-  private val truncationWarningPrinted = new AtomicBoolean(false)
+  val truncationWarningPrinted = new AtomicBoolean(false)
 
   /** Serialize an object using Java serialization */
   def serialize[T](o: T): Array[Byte] = {
@@ -277,9 +277,9 @@ object Utils extends Logging {
     * Get the local host's IP address in dotted-quad format (e.g. 1.2.3.4).
     * Note, this is typically not used from within core spark.
     */
-  private lazy val localIpAddress: InetAddress = findLocalInetAddress()
+  lazy val localIpAddress: InetAddress = findLocalInetAddress()
 
-  private def findLocalInetAddress(): InetAddress = {
+  def findLocalInetAddress(): InetAddress = {
     val defaultIpOverride = System.getenv("SPARK_LOCAL_IP")
     if (defaultIpOverride != null) {
       InetAddress.getByName(defaultIpOverride)
@@ -312,7 +312,7 @@ object Utils extends Logging {
     }
   }
 
-  private var customHostname: Option[String] = sys.env.get("SPARK_LOCAL_HOSTNAME")
+  var customHostname: Option[String] = sys.env.get("SPARK_LOCAL_HOSTNAME")
 
   /**
     * Allow setting a custom host name because when we run on Mesos we need to use the same
@@ -356,7 +356,7 @@ object Utils extends Logging {
 
   // Typically, this will be of order of number of nodes in cluster
   // If not, we should change it to LRUCache or something.
-  private val hostPortParseResults = new ConcurrentHashMap[String, (String, Int)]()
+  val hostPortParseResults = new ConcurrentHashMap[String, (String, Int)]()
 
   def parseHostPort(hostPort: String): (String, Int) = {
     // Check cache first.
@@ -546,11 +546,11 @@ object Utils extends Logging {
 
   // A regular expression to match classes of the internal Spark API's
   // that we want to skip when finding the call site of a method.
-  private val SPARK_CORE_CLASS_REGEX = """^org\.apache\.spark(\.api\.java)?(\.util)?(\.rdd)?(\.broadcast)?\.[A-Z]""".r
-  private val SPARK_SQL_CLASS_REGEX = """^org\.apache\.spark\.sql.*""".r
+  val SPARK_CORE_CLASS_REGEX = """^org\.apache\.spark(\.api\.java)?(\.util)?(\.rdd)?(\.broadcast)?\.[A-Z]""".r
+  val SPARK_SQL_CLASS_REGEX = """^org\.apache\.spark\.sql.*""".r
 
   /** Default filtering function for finding call sites using `getCallSite`. */
-  private def sparkInternalExclusionFunction(className: String): Boolean = {
+  def sparkInternalExclusionFunction(className: String): Boolean = {
     val SCALA_CORE_CLASS_PREFIX = "scala"
     val isSparkClass = SPARK_CORE_CLASS_REGEX.findFirstIn(className).isDefined || SPARK_SQL_CLASS_REGEX.findFirstIn(className).isDefined
     val isScalaClass = className.startsWith(SCALA_CORE_CLASS_PREFIX) // If the class is a Spark internal class or a Scala class, then exclude.
@@ -618,7 +618,7 @@ object Utils extends Logging {
   }
 
 
-  private def isSpace(c: Char): Boolean = {
+  def isSpace(c: Char): Boolean = {
     " \t\r\n".indexOf(c) != -1
   }
 
@@ -985,7 +985,7 @@ object Utils extends Logging {
     * @param str
     * @return the trimmed value of str
     */
-  private[util] def trimExceptCRLF(str: String): String = {
+  def trimExceptCRLF(str: String): String = {
     val nonSpaceOrNaturalLineDelimiter: Char => Boolean = { ch =>
       ch > ' ' || ch == '\r' || ch == '\n'
     }
@@ -1136,7 +1136,7 @@ object Utils extends Logging {
   /**
     * Remove the packages from full qualified class name
     */
-  private def stripPackages(fullyQualifiedName: String): String = {
+  def stripPackages(fullyQualifiedName: String): String = {
     fullyQualifiedName.split("\\.").takeRight(1)(0)
   }
 
@@ -1144,7 +1144,7 @@ object Utils extends Logging {
     * Remove trailing dollar signs from qualified class name,
     * and return the trailing part after the last dollar sign in the middle
     */
-  private def stripDollars(s: String): String = {
+  def stripDollars(s: String): String = {
     val lastDollarIndex = s.lastIndexOf('$')
     if (lastDollarIndex < s.length - 1) {
       // The last char is not a dollar sign
@@ -1182,7 +1182,7 @@ object Utils extends Logging {
     * Looked at all the 0x0000-0xFFFF characters (unicode) and showed them under Xshell.
     * Found all the full width characters, then get the regular expression.
     */
-  private val fullWidthRegex = ("""[""" + // scalastyle:off nonascii
+  val fullWidthRegex = ("""[""" + // scalastyle:off nonascii
     """\u1100-\u115F""" + """\u2E80-\uA4CF""" + """\uAC00-\uD7A3""" + """\uF900-\uFAFF""" + """\uFE10-\uFE19""" + """\uFE30-\uFE6F""" + """\uFF00-\uFF60""" + """\uFFE0-\uFFE6""" + // scalastyle:on nonascii
     """]""").r
 
