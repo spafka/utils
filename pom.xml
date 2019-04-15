@@ -31,10 +31,6 @@
         <system>GitHub Issues</system>
         <url>https://github.com/spafka/utils/issues</url>
     </issueManagement>
-    <ciManagement>
-        <system>Web site</system>
-        <url>http://dot.cc</url>
-    </ciManagement>
 
     <developers>
         <developer>

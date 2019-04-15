@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
  */
 
 @Slf4j
-public class HttpUtils {
+public class OkHttpUtils {
 
 
     static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -29,7 +29,7 @@ public class HttpUtils {
                 .build();
         String result = "";
         try {
-            Response response = HttpUtils.client.newCall(request).execute();
+            Response response = client.newCall(request).execute();
             result = response.body().string();
         } catch (IOException e) {
         }
