@@ -2,6 +2,7 @@ package io.github.spafka.http;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +44,7 @@ public class OkHttpUtils {
                 .build();
 
 
-        client.newCall(request).enqueue(new Callback() {
+            Callback fail = new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 log.error("url call Fail");
@@ -52,9 +53,20 @@ public class OkHttpUtils {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 log.error(response.body().string());
-
             }
-        });
+        };
+        client.newCall(request).enqueue(fail);
+
+    }
+
+    public static void doGetAsync(String url,Callback callback) {
+
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+
+        client.newCall(request).enqueue(callback);
 
     }
 
@@ -74,7 +86,7 @@ public class OkHttpUtils {
                 result = response.body().string();
             }
         } catch (IOException e) {
-
+            log.error("e= {}", ExceptionUtils.getStackTrace(e));
         }
 
         return result;
@@ -101,6 +113,18 @@ public class OkHttpUtils {
 
             }
         });
+
+    }
+
+    public static void doPostAsync(String url, String json,Callback callback) {
+        RequestBody requestBody = RequestBody.create(JSON, json);
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+
+
+        client.newCall(request).enqueue(callback);
 
     }
 
