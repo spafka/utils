@@ -5,6 +5,9 @@ import okhttp3.*;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -23,6 +26,35 @@ public class OkHttpUtils {
             .writeTimeout(20, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS).build();
 
+    public static String doGet(String baseUrl, HashMap<String, Object> param) {
+
+        Iterator<Map.Entry<String, Object>> it = param.entrySet().iterator();
+
+        StringBuffer buffer = new StringBuffer();
+        while (it.hasNext()) {
+            Map.Entry<String, Object> entry = it.next();
+            Object key = entry.getKey();
+            buffer.append(key);
+            buffer.append('=');
+            Object value = entry.getValue();
+            buffer.append(value);
+            if (it.hasNext()) {
+                buffer.append("&");
+            }
+        }
+
+        Request request = new Request.Builder()
+                .url(baseUrl + buffer)
+                .build();
+        String result = "";
+        try {
+            Response response = client.newCall(request).execute();
+            result = response.body().string();
+        } catch (IOException e) {
+        }
+        return result;
+    }
+
     public static String doGet(String url) {
 
         Request request = new Request.Builder()
@@ -37,29 +69,31 @@ public class OkHttpUtils {
         return result;
     }
 
-    public static void doGetAsync(String url) {
+    public static void doGetAsync(String url, String baseUrl, HashMap<String, Object> param, Callback callback) {
+
+        Iterator<Map.Entry<String, Object>> it = param.entrySet().iterator();
+
+        StringBuffer buffer = new StringBuffer();
+        while (it.hasNext()) {
+            Map.Entry<String, Object> entry = it.next();
+            Object key = entry.getKey();
+            buffer.append(key);
+            buffer.append('=');
+            Object value = entry.getValue();
+            buffer.append(value);
+            if (it.hasNext()) {
+                buffer.append("&");
+            }
+        }
 
         Request request = new Request.Builder()
-                .url(url)
+                .url(baseUrl + buffer)
                 .build();
-
-
-            Callback fail = new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                log.error("url call Fail");
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                log.error(response.body().string());
-            }
-        };
-        client.newCall(request).enqueue(fail);
+        client.newCall(request).enqueue(callback);
 
     }
 
-    public static void doGetAsync(String url,Callback callback) {
+    public static void doGetAsync(String url, Callback callback) {
 
         Request request = new Request.Builder()
                 .url(url)
@@ -116,7 +150,7 @@ public class OkHttpUtils {
 
     }
 
-    public static void doPostAsync(String url, String json,Callback callback) {
+    public static void doPostAsync(String url, String json, Callback callback) {
         RequestBody requestBody = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
                 .url(url)
