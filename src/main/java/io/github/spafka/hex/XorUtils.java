@@ -12,7 +12,8 @@ public class XorUtils {
 
     public static String  xorAtFixPosit(@NonNull String s1, @NonNull String s2, int poisition) {
 
-        Preconditions.checkState(s1.length() == s2.length());
+
+        Preconditions.checkState(s1.length() == s2.length(),new scala.Tuple4<String,String,Integer,Integer>(s1,s2,s1.length(),s2.length()));
 
         int length = s1.length();
 
@@ -24,15 +25,24 @@ public class XorUtils {
             } else {
                 if (s1.charAt(i) != s2.charAt(i)) {
                     sb.append(s2.charAt(i));
+                }else {
+                    sb.append("1");
                 }
             }
 
         }
-        return sb.toString();
+
+        String s = sb.toString();
+        if (s.length()%8!=0){
+            log.error("{} {} {} {} ",s1,s2,s,s.length());
+        }
+        return s ;
     }
 
     // 把8位字节拼成byte数组
     public static byte[] cheng8bitString2Bytes(String string) {
+
+
 
         Preconditions.checkState(string.length() % 8 == 0);
 
