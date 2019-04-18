@@ -250,7 +250,8 @@ object Utils extends Logging {
     // This will lead to stream corruption issue when using sort-based shuffle (SPARK-3948).
     val finalPos = output.position()
     val expectedPos = initialPos + bytesToCopy
-    assert(finalPos == expectedPos, s"""
+    assert(finalPos == expectedPos,
+      s"""
          |Current position $finalPos do not equal to expected position $expectedPos
          |after transferTo, please check your kernel version to see if it is 2.6.32,
          |this is a kernel bug which will lead to unexpected behavior when using transferTo.
@@ -289,6 +290,17 @@ object Utils extends Logging {
     val result = body
     val endTime = System.nanoTime()
     (result, math.max(NANOSECONDS.toMillis(endTime - startTime), 0))
+  }
+
+  /** Records the duration of running `body`. */
+  def timeTakenMs[T](body: => T): T = {
+    val startTime = System.nanoTime()
+    val result = body
+    val endTime = System.nanoTime()
+    import sun.reflect.Reflection
+    logInfo(s"${Reflection.getCallerClass(2)} ${math.max(NANOSECONDS.toMillis(endTime - startTime), 0)} ms")
+
+    result
   }
 
 
@@ -565,7 +577,8 @@ object Utils extends Logging {
 
   // A regular expression to match classes of the internal Spark API's
   // that we want to skip when finding the call site of a method.
-  val SPARK_CORE_CLASS_REGEX = """^org\.apache\.spark(\.api\.java)?(\.util)?(\.rdd)?(\.broadcast)?\.[A-Z]""".r
+  val SPARK_CORE_CLASS_REGEX =
+  """^org\.apache\.spark(\.api\.java)?(\.util)?(\.rdd)?(\.broadcast)?\.[A-Z]""".r
   val SPARK_SQL_CLASS_REGEX = """^org\.apache\.spark\.sql.*""".r
 
   /** Default filtering function for finding call sites using `getCallSite`. */
@@ -1202,7 +1215,14 @@ object Utils extends Logging {
     * Found all the full width characters, then get the regular expression.
     */
   val fullWidthRegex = ("""[""" + // scalastyle:off nonascii
-    """\u1100-\u115F""" + """\u2E80-\uA4CF""" + """\uAC00-\uD7A3""" + """\uF900-\uFAFF""" + """\uFE10-\uFE19""" + """\uFE30-\uFE6F""" + """\uFF00-\uFF60""" + """\uFFE0-\uFFE6""" + // scalastyle:on nonascii
+    """\u1100-\u115F""" +
+    """\u2E80-\uA4CF""" +
+    """\uAC00-\uD7A3""" +
+    """\uF900-\uFAFF""" +
+    """\uFE10-\uFE19""" +
+    """\uFE30-\uFE6F""" +
+    """\uFF00-\uFF60""" +
+    """\uFFE0-\uFFE6""" + // scalastyle:on nonascii
     """]""").r
 
   /**
