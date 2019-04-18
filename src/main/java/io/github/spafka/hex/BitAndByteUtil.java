@@ -1,10 +1,6 @@
 package io.github.spafka.hex;
 
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 public class BitAndByteUtil {
 
     private static final char[] bcdLookup = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
@@ -13,9 +9,62 @@ public class BitAndByteUtil {
         return (short) (((b[index + 0] << 8) | b[index + 1] & 0xFF));
     }
 
-    public int getInt(byte[] bb, int index) {
-        return (int) ((((bb[index + 3] & 0xff) << 24) | ((bb[index + 2] & 0xff) << 16) | ((bb[index + 1] & 0xff) << 8)
-                | ((bb[index + 0] & 0xff) << 0)));
+    /**
+     * 两个二进制数相加。
+     *
+     * @param bnum1    第一个二进制数 字符串
+     * @param bnum2    第二个二进制数 字符串
+     * @param overflow 是否运行溢出。
+     * @return 返回相加结果
+     */
+    private static String binaryAdd(String bnum1, String bnum2, boolean overflow) {
+        boolean flag = false;
+        char[] bb1 = bnum1.toCharArray();
+        char[] bb2 = bnum2.toCharArray();
+        int maxLength = (bb1.length >= bb2.length ? bb1.length : bb2.length);
+        StringBuffer result = new StringBuffer();
+        for (int i = 0; i < maxLength; i++) {
+            // 万一长度不相等的两个二进制数 怎么办
+            if (i > bb1.length - 1 || i > bb2.length - 1) {
+                System.out.println("字符串长度不一报警！");
+                throw new AbstractMethodError("对与长度不相等的二进制数相加，还有待实现！");
+            }
+            if (flag) {
+                // 说明上一位有进位
+                int temp1 = Integer.parseInt(bb1[bb1.length - i - 1] + "");
+                int temp2 = Integer.parseInt(bb2[bb2.length - i - 1] + "");
+                // 因为上次有进位，所以这次相加时候 要加1 并得到的结果重置flag 得到这次是否有进位
+                flag = (temp1 + temp2 + 1 > 1);
+
+                if (flag) {
+                    // 有进位 可能是0 也可能是1
+                    result.append(temp1 + temp2 + 1 == 2 ? '0' : '1');
+                } else {
+                    // 无进位 但要加上上一次的进位1
+                    result.append('1');
+                }
+
+            } else {
+                // 上一没有进位
+                int temp1 = Integer.parseInt(bb1[bb1.length - i - 1] + "");
+                int temp2 = Integer.parseInt(bb2[bb2.length - i - 1] + "");
+                flag = (temp1 + temp2 > 1);
+                if (flag) {
+                    // 有进位
+                    result.append('0');
+                } else {
+                    // 无进位
+                    int temp3 = (temp1 + temp2);
+                    result.append(temp3 == 0 ? '0' : '1');
+                }
+            }
+
+        }
+        // 是否可以溢出
+        if (overflow && flag && bb1.length == bb2.length) {
+            result.append('1');
+        }
+        return result.reverse().toString();
     }
 
     public int byteToShort(byte[] bytes, int offset) {
@@ -420,65 +469,9 @@ public class BitAndByteUtil {
         return minNum;
     }
 
-    /**
-     * 两个二进制数相加。
-     *
-     * @param bnum1
-     *            第一个二进制数 字符串
-     * @param bnum2
-     *            第二个二进制数 字符串
-     * @param overflow
-     *            是否运行溢出。
-     * @return 返回相加结果
-     */
-    private static String binaryAdd(String bnum1, String bnum2, boolean overflow) {
-        boolean flag = false;
-        char[] bb1 = bnum1.toCharArray();
-        char[] bb2 = bnum2.toCharArray();
-        int maxLength = (bb1.length >= bb2.length ? bb1.length : bb2.length);
-        StringBuffer result = new StringBuffer();
-        for (int i = 0; i < maxLength; i++) {
-            // 万一长度不相等的两个二进制数 怎么办
-            if (i > bb1.length - 1 || i > bb2.length - 1) {
-                System.out.println("字符串长度不一报警！");
-                throw new AbstractMethodError("对与长度不相等的二进制数相加，还有待实现！");
-            }
-            if (flag) {
-                // 说明上一位有进位
-                int temp1 = Integer.parseInt(bb1[bb1.length - i - 1] + "");
-                int temp2 = Integer.parseInt(bb2[bb2.length - i - 1] + "");
-                // 因为上次有进位，所以这次相加时候 要加1 并得到的结果重置flag 得到这次是否有进位
-                flag = (temp1 + temp2 + 1 > 1 ? true : false);
-
-                if (flag) {
-                    // 有进位 可能是0 也可能是1
-                    result.append(temp1 + temp2 + 1 == 2 ? '0' : '1');
-                } else {
-                    // 无进位 但要加上上一次的进位1
-                    result.append('1');
-                }
-
-            } else {
-                // 上一没有进位
-                int temp1 = Integer.parseInt(bb1[bb1.length - i - 1] + "");
-                int temp2 = Integer.parseInt(bb2[bb2.length - i - 1] + "");
-                flag = (temp1 + temp2 > 1 ? true : false);
-                if (flag) {
-                    // 有进位
-                    result.append('0');
-                } else {
-                    // 无进位
-                    int temp3 = (temp1 + temp2);
-                    result.append(temp3 == 0 ? '0' : '1');
-                }
-            }
-
-        }
-        // 是否可以溢出
-        if (overflow && flag && bb1.length == bb2.length) {
-            result.append('1');
-        }
-        return result.reverse().toString();
+    public int getInt(byte[] bb, int index) {
+        return (((bb[index + 3] & 0xff) << 24) | ((bb[index + 2] & 0xff) << 16) | ((bb[index + 1] & 0xff) << 8)
+                | ((bb[index + 0] & 0xff) << 0));
     }
 
     /**
