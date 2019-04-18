@@ -293,7 +293,7 @@ object Utils extends Logging {
   }
 
   /** Records the duration of running `body`. */
-  def timeTakenMs[T](body: => T): T = {
+  def logTimeTakenMs[T](body: => T): T = {
     val startTime = System.nanoTime()
     val result = body
     val endTime = System.nanoTime()
