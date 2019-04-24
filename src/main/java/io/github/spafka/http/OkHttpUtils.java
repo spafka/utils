@@ -20,6 +20,7 @@
 
 package io.github.spafka.http;
 
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -45,7 +46,7 @@ public class OkHttpUtils {
             .writeTimeout(20, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS).build();
 
-    public static String doGet(String baseUrl, HashMap<String, Object> param) {
+    public static String doGet(String baseUrl, @NonNull HashMap<String, Object> param) throws IOException {
 
         Iterator<Map.Entry<String, Object>> it = param.entrySet().iterator();
 
@@ -68,27 +69,24 @@ public class OkHttpUtils {
         String result = "";
         try {
             Response response = client.newCall(request).execute();
-            result = response.body().string();
+            if (response.isSuccessful()) {
+                result = response.body().string();
+            }
         } catch (IOException e) {
+            log.error("{}", ExceptionUtils.getStackTrace(e));
+            throw e;
         }
         return result;
     }
 
-    public static String doGet(String url) {
 
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
-        String result = "";
-        try {
-            Response response = client.newCall(request).execute();
-            result = response.body().string();
-        } catch (IOException e) {
-        }
-        return result;
+    public static String doGet(String url) throws IOException {
+
+
+        return doGet(url, new HashMap<String, Object>());
     }
 
-    public static void doGetAsync(String url, String baseUrl, HashMap<String, Object> param, Callback callback) {
+    public static void doGetAsync(String baseUrl, @NonNull HashMap<String, Object> param, @NonNull Callback callback) {
 
         Iterator<Map.Entry<String, Object>> it = param.entrySet().iterator();
 
@@ -112,19 +110,7 @@ public class OkHttpUtils {
 
     }
 
-    public static void doGetAsync(String url, Callback callback) {
-
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
-
-
-        client.newCall(request).enqueue(callback);
-
-    }
-
-
-    public static String doPost(String url, String json) {
+    public static String doPost(String url, @NonNull String json) {
         RequestBody requestBody = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
                 .url(url)
@@ -145,19 +131,28 @@ public class OkHttpUtils {
         return result;
     }
 
-
-    public static void doPostAsync(String url, String json) {
+    public static void doPost(String url, String json, @NonNull Callback callback) {
         RequestBody requestBody = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
                 .url(url)
                 .post(requestBody)
                 .build();
 
+        client.newCall(request).enqueue(callback);
+
+    }
+
+    public static void doPostAsync(String url, @NonNull String json) {
+        RequestBody requestBody = RequestBody.create(JSON, json);
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                log.error("url call Fail");
+                log.error("{}", ExceptionUtils.getStackTrace(e));
             }
 
             @Override
@@ -169,7 +164,7 @@ public class OkHttpUtils {
 
     }
 
-    public static void doPostAsync(String url, String json, Callback callback) {
+    public static void doPostAsync(String url, @NonNull String json, @NonNull Callback callback) {
         RequestBody requestBody = RequestBody.create(JSON, json);
         Request request = new Request.Builder()
                 .url(url)
