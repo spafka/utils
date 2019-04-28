@@ -19,9 +19,14 @@
 package io.github.spafka.hex;
 
 
+import org.apache.commons.lang3.time.FastDateFormat;
+
+import java.text.ParseException;
+import java.util.Date;
+
 public class BitAndByteUtil {
 
-    private static final char[] bcdLookup = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+    public final static FastDateFormat format = FastDateFormat.getInstance("yyyy-MM-dd HH:mm:ss");
 
     public short getShort(byte[] b, int index) {
         return (short) (((b[index + 0] << 8) | b[index + 1] & 0xFF));
@@ -91,11 +96,149 @@ public class BitAndByteUtil {
         return (high << 8 & 0xFF00) | (low & 0xFF);
     }
 
+    private static final char[] bcdLookup = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+
+    /**
+     * long转换为8字节数组
+     *
+     * @param longValue 数值
+     * @return 8字节数组
+     */
+    public static byte[] long2Bytes(long longValue) {
+        byte[] byteNum = new byte[8];
+        for (int ix = 0; ix < 8; ++ix) {
+            int offset = 64 - (ix + 1) * 8;
+            byteNum[ix] = (byte) ((longValue >> offset) & 0xff);
+        }
+        return byteNum;
+    }
+
+    private byte charToByte(char c) {
+        return (byte) "0123456789ABCDEF".indexOf(c);
+    }
+
+    /**
+     * 字节数组转16进制字符串
+     *
+     * @param bytes 字节数组
+     * @return 16进制字符串
+     */
+    public static String byte2hex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < bytes.length; i++) {
+            String hex = Integer.toHexString(bytes[i] & 0xFF);
+            if (hex.length() == 1) {
+                sb.append("0");
+            }
+            sb.append(hex.toUpperCase());
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 从补码获得到反码需要-1，这个是求出这个-1的补码
+     *
+     * @param binaryLength 要求给出这个补码的长度
+     * @return
+     */
+    private static String getMinusNum(int binaryLength) {
+        String minNum = "0";
+        for (int i = 0; i < binaryLength - 1; i++) {
+            minNum = minNum + "1";
+        }
+        return minNum;
+    }
+
+    /**
+     * 获取反码
+     *
+     * @param binary 要被转换的二进制
+     * @return
+     */
+    private static String getOpposit(String binary) {
+        char[] binArray = binary.toCharArray();
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < binary.length(); i++) {
+            if (binArray[i] == '0') {
+                sb.append(1);
+            } else {
+                sb.append(0);
+            }
+        }
+        return sb.toString();
+    }
+
+    public long bitToLong(String bitString) {
+        long re = 0;
+        try {
+            if (bitString.length() < 64) {
+                re = Long.parseLong(bitString, 2);
+                return re;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    /**
+     * 有符号二进制数据转Int
+     *
+     * @param bitString
+     * @return
+     */
+    public int signedBinaryToInt(String bitString) {
+        int re, len;
+        if (null == bitString) {
+            return 0;
+        }
+        if (bitString.charAt(0) == '0') {// 正数
+            re = Integer.parseInt(bitString, 2);
+        } else {// 负数
+            re = Integer.parseInt(bitString.substring(1), 2) * -1;
+        }
+
+        return re;
+    }
+
+    /**
+     * 十六进制转十进制
+     *
+     * @param num
+     * @return
+     */
+    public static Integer get10HexNum(String num) {
+        return Integer.parseInt(num, 16);
+    }
+
+    /**
+     * 倒序字符串
+     *
+     * @param old
+     * @return
+     */
+    public static String reverseOrder(String old) {
+        return new StringBuffer(old).reverse().toString();
+    }
+
+    public static long date2timestampS(int tm_year, int tm_mon, int tm_mday, int tm_hour, int tm_min, int tm_sec) throws ParseException {
+        return date2timestampMs(tm_year, tm_mon, tm_mday, tm_hour, tm_min, tm_sec) / 1000;
+    }
+
+    public static long date2timestampMs(int tm_year, int tm_mon, int tm_mday, int tm_hour, int tm_min, int tm_sec) throws ParseException {
+        Date date = null;
+        String str_datetime;
+        str_datetime = "" + tm_year + "-" + tm_mon + "-" + tm_mday + " " + tm_hour + ":" + tm_min + ":" + tm_sec;
+
+        date = format.parse(str_datetime);
+        return date.getTime();
+    }
+
     /**
      * 16进制字符串转字节数组
      *
-     * @param hexString
-     *            16进制字符串
+     * @param hexString 16进制字符串
      * @return 字节数组
      */
     public byte[] hexStringToBytes(String hexString) {
@@ -118,20 +261,15 @@ public class BitAndByteUtil {
 
         hexString = hexString.toUpperCase().replace(" ", "");
         char[] hexChars = hexString.toCharArray();
-        return 	(byte) (charToByte(hexChars[0]) << 4 | charToByte(hexChars[0 + 1]));
+        return (byte) (charToByte(hexChars[0]) << 4 | charToByte(hexChars[0 + 1]));
 
 
-    }
-
-    private byte charToByte(char c) {
-        return (byte) "0123456789ABCDEF".indexOf(c);
     }
 
     /**
      * 字节转二进制字符串
      *
-     * @param b
-     *            字节
+     * @param b 字节
      * @return 二进制字符串
      */
     public String byteToBit(byte b) {
@@ -142,10 +280,26 @@ public class BitAndByteUtil {
     }
 
     /**
+     * 字节数组转16进制字符串 以空格分割
+     *
+     * @param bcd
+     * @return 16进制字符串
+     */
+    public final String bytesToHexStr(byte[] bcd) {
+        StringBuffer s = new StringBuffer(bcd.length * 2);
+
+        for (int i = 0; i < bcd.length; i++) {
+            s.append(bcdLookup[(bcd[i] >>> 4) & 0x0f]);
+            s.append(bcdLookup[bcd[i] & 0x0f] + " ");
+        }
+
+        return s.toString();
+    }
+
+    /**
      * 二进制字符串转字节
      *
-     * @param bitString
-     *            二进制字符串
+     * @param bitString 二进制字符串
      * @return byte
      */
     public byte BitToByte(String bitString) {
@@ -185,239 +339,6 @@ public class BitAndByteUtil {
         return (byte) re;
     }
 
-    /**
-     * 二进制字符串转int
-     *
-     * @param bitString
-     *            二进制字符串
-     * @return int
-     */
-    public int BitToInt(String bitString) {
-        int re, len;
-        if (null == bitString) {
-            return 0;
-        }
-
-        len = bitString.length();
-        if (len == 8) {// 8 bit处理
-            if (bitString.charAt(0) == '0') {// 正数
-                re = Integer.parseInt(bitString, 2);
-            } else {// 负数
-                re = Integer.parseInt(bitString, 2) & 0xff;
-            }
-        } else {// 4 bit处理
-            try {
-                re = Integer.parseInt(bitString, 2);
-            } catch (Exception e) {
-                return 1;
-            }
-
-        }
-        return re;
-    }
-
-    public long bitToLong(String bitString) {
-        long re = 0;
-        try {
-            if (bitString.length() < 64) {
-                re = Long.parseLong(bitString, 2);
-                return re;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return 0;
-    }
-
-    /**
-     * 有符号二进制数据转Int
-     *
-     * @param bitString
-     * @return
-     */
-    public int signedBinaryToInt(String bitString) {
-        int re, len;
-        if (null == bitString) {
-            return 0;
-        }
-        if (bitString.charAt(0) == '0') {// 正数
-            re = Integer.parseInt(bitString, 2);
-        } else {// 负数
-            re = Integer.parseInt(bitString.substring(1), 2) * -1;
-        }
-
-        return re;
-    }
-
-    /**
-     * 二进制字符串转16进制字符串
-     *
-     * @param bitString
-     *            bitString
-     * @return 16进制字符串
-     */
-    public String binaryString2hexString(String bitString) {
-        if (bitString == null || bitString.equals("") || bitString.length() % 8 != 0)
-            return null;
-        StringBuffer tmp = new StringBuffer();
-        int iTmp = 0;
-        for (int i = 0; i < bitString.length(); i += 4) {
-            iTmp = 0;
-            for (int j = 0; j < 4; j++) {
-                iTmp += Integer.parseInt(bitString.substring(i + j, i + j + 1)) << (4 - j - 1);
-            }
-            tmp.append(Integer.toHexString(iTmp));
-        }
-        return tmp.toString();
-    }
-
-    /**
-     * 将4字节的byte数组转成int值
-     *
-     * @param bytes
-     *            将4字节的byte数组
-     * @return int
-     */
-    public int byteArray2int(byte[] bytes) {
-        byte[] a = new byte[4];
-        int i = a.length - 1, j = bytes.length - 1;
-        for (; i >= 0; i--, j--) {// 从b的尾部(即int值的低位)开始copy数据
-            if (j >= 0)
-                a[i] = bytes[j];
-            else
-                a[i] = 0;// 如果b.length不足4,则将高位补0
-        }
-        int v0 = (a[0] & 0xff) << 24;// &0xff将byte值无差异转成int,避免Java自动类型提升后,会保留高位的符号位
-        int v1 = (a[1] & 0xff) << 16;
-        int v2 = (a[2] & 0xff) << 8;
-        int v3 = (a[3] & 0xff);
-        return v0 + v1 + v2 + v3;
-    }
-
-    /**
-     * 字节数组转为long
-     *
-     * @param bytes
-     *            字节数组
-     * @return long
-     */
-    public long byteArray2long(byte[] bytes) {
-        long l = 0;
-        l = (0xffL & (long) bytes[0]) | (0xff00L & ((long) bytes[1] << 8)) | (0xff0000L & ((long) bytes[2] << 16))
-                | (0xff000000L & ((long) bytes[3] << 24)) | (0xff00000000L & ((long) bytes[4] << 32))
-                | (0xff0000000000L & ((long) bytes[5] << 40)) | (0xff000000000000L & ((long) bytes[6] << 48))
-                | (0xff00000000000000L & ((long) bytes[7] << 56));
-        return l;
-
-    }
-
-    /**
-     * 整型转换为4位字节数组
-     *
-     * @param intValue
-     *            数值
-     * @return 4位字节数组
-     */
-    public byte[] int2Byte(int intValue) {
-        byte[] b = new byte[4];
-        for (int i = 0; i < 4; i++) {
-            b[i] = (byte) (intValue >> 8 * (3 - i) & 0xFF);
-        }
-        return b;
-    }
-
-    /**
-     * long转换为8字节数组
-     *
-     * @param longValue
-     *            数值
-     * @return 8字节数组
-     */
-    public static byte[] long2Bytes(long longValue) {
-        byte[] byteNum = new byte[8];
-        for (int ix = 0; ix < 8; ++ix) {
-            int offset = 64 - (ix + 1) * 8;
-            byteNum[ix] = (byte) ((longValue >> offset) & 0xff);
-        }
-        return byteNum;
-    }
-
-    /**
-     * 十六进制字符串转化为字符串
-     *
-     * @param hex
-     *            十六进制字符串
-     * @return 字符串
-     */
-    public String convertHexToString(String hex) {
-
-        StringBuilder sb = new StringBuilder();
-        StringBuilder temp = new StringBuilder();
-        for (int i = 0; i < hex.length() - 1; i += 2) {
-            String output = hex.substring(i, (i + 2));
-            int decimal = Integer.parseInt(output, 16);
-            sb.append((char) decimal);
-            temp.append(decimal);
-        }
-        return sb.toString();
-    }
-
-    /**
-     * 字节数组转16进制字符串 以空格分割
-     *
-     * @param bytes
-     *            字节数组
-     * @return 16进制字符串
-     */
-    public String bytesToHexString(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < bytes.length; i++) {
-            String hex = Integer.toHexString(bytes[i] & 0xFF);
-            if (hex.length() == 1) {
-                sb.append("0");
-            }
-            sb.append(hex.toUpperCase() + " ");
-        }
-        return sb.toString();
-    }
-
-    /**
-     * 字节数组转16进制字符串 以空格分割
-     *
-     * @param bcd
-     * @return 16进制字符串
-     */
-    public final String bytesToHexStr(byte[] bcd) {
-        StringBuffer s = new StringBuffer(bcd.length * 2);
-
-        for (int i = 0; i < bcd.length; i++) {
-            s.append(bcdLookup[(bcd[i] >>> 4) & 0x0f]);
-            s.append(bcdLookup[bcd[i] & 0x0f] + " ");
-        }
-
-        return s.toString();
-    }
-
-    /**
-     * 字节数组转16进制字符串
-     *
-     * @param bytes
-     *            字节数组
-     * @return 16进制字符串
-     */
-    public static String byte2hex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < bytes.length; i++) {
-            String hex = Integer.toHexString(bytes[i] & 0xFF);
-            if (hex.length() == 1) {
-                sb.append("0");
-            }
-            sb.append(hex.toUpperCase());
-        }
-        return sb.toString();
-    }
-
     public int hex2int(String str) {
         int a = 0;
         if (null != str && str.length() > 0) {
@@ -447,7 +368,6 @@ public class BitAndByteUtil {
     }
 
     /**
-     *
      * 将二进制字符串转化为有符号的十进制数
      *
      * @param binaryString
@@ -472,18 +392,33 @@ public class BitAndByteUtil {
     }
 
     /**
-     * 从补码获得到反码需要-1，这个是求出这个-1的补码
+     * 二进制字符串转int
      *
-     * @param binaryLength
-     *            要求给出这个补码的长度
-     * @return
+     * @param bitString 二进制字符串
+     * @return int
      */
-    private static String getMinusNum(int binaryLength) {
-        String minNum = "0";
-        for (int i = 0; i < binaryLength - 1; i++) {
-            minNum = minNum + "1";
+    public int BitToInt(String bitString) {
+        int re, len;
+        if (null == bitString) {
+            return 0;
         }
-        return minNum;
+
+        len = bitString.length();
+        if (len == 8) {// 8 bit处理
+            if (bitString.charAt(0) == '0') {// 正数
+                re = Integer.parseInt(bitString, 2);
+            } else {// 负数
+                re = Integer.parseInt(bitString, 2) & 0xff;
+            }
+        } else {// 4 bit处理
+            try {
+                re = Integer.parseInt(bitString, 2);
+            } catch (Exception e) {
+                return 1;
+            }
+
+        }
+        return re;
     }
 
     public int getInt(byte[] bb, int index) {
@@ -492,42 +427,113 @@ public class BitAndByteUtil {
     }
 
     /**
-     * 获取反码
+     * 二进制字符串转16进制字符串
      *
-     * @param binary
-     *            要被转换的二进制
-     * @return
+     * @param bitString bitString
+     * @return 16进制字符串
      */
-    private static String getOpposit(String binary) {
-        char[] binArray = binary.toCharArray();
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < binary.length(); i++) {
-            if (binArray[i] == '0') {
-                sb.append(1);
-            } else {
-                sb.append(0);
+    public String binaryString2hexString(String bitString) {
+        if (bitString == null || bitString.equals("") || bitString.length() % 8 != 0)
+            return null;
+        StringBuffer tmp = new StringBuffer();
+        int iTmp = 0;
+        for (int i = 0; i < bitString.length(); i += 4) {
+            iTmp = 0;
+            for (int j = 0; j < 4; j++) {
+                iTmp += Integer.parseInt(bitString.substring(i + j, i + j + 1)) << (4 - j - 1);
             }
+            tmp.append(Integer.toHexString(iTmp));
+        }
+        return tmp.toString();
+    }
+
+    /**
+     * 将4字节的byte数组转成int值
+     *
+     * @param bytes 将4字节的byte数组
+     * @return int
+     */
+    public int byteArray2int(byte[] bytes) {
+        byte[] a = new byte[4];
+        int i = a.length - 1, j = bytes.length - 1;
+        for (; i >= 0; i--, j--) {// 从b的尾部(即int值的低位)开始copy数据
+            if (j >= 0)
+                a[i] = bytes[j];
+            else
+                a[i] = 0;// 如果b.length不足4,则将高位补0
+        }
+        int v0 = (a[0] & 0xff) << 24;// &0xff将byte值无差异转成int,避免Java自动类型提升后,会保留高位的符号位
+        int v1 = (a[1] & 0xff) << 16;
+        int v2 = (a[2] & 0xff) << 8;
+        int v3 = (a[3] & 0xff);
+        return v0 + v1 + v2 + v3;
+    }
+
+    /**
+     * 字节数组转为long
+     *
+     * @param bytes 字节数组
+     * @return long
+     */
+    public long byteArray2long(byte[] bytes) {
+        long l = 0;
+        l = (0xffL & (long) bytes[0]) | (0xff00L & ((long) bytes[1] << 8)) | (0xff0000L & ((long) bytes[2] << 16))
+                | (0xff000000L & ((long) bytes[3] << 24)) | (0xff00000000L & ((long) bytes[4] << 32))
+                | (0xff0000000000L & ((long) bytes[5] << 40)) | (0xff000000000000L & ((long) bytes[6] << 48))
+                | (0xff00000000000000L & ((long) bytes[7] << 56));
+        return l;
+
+    }
+
+    /**
+     * 整型转换为4位字节数组
+     *
+     * @param intValue 数值
+     * @return 4位字节数组
+     */
+    public byte[] int2Byte(int intValue) {
+        byte[] b = new byte[4];
+        for (int i = 0; i < 4; i++) {
+            b[i] = (byte) (intValue >> 8 * (3 - i) & 0xFF);
+        }
+        return b;
+    }
+
+    /**
+     * 十六进制字符串转化为字符串
+     *
+     * @param hex 十六进制字符串
+     * @return 字符串
+     */
+    public String convertHexToString(String hex) {
+
+        StringBuilder sb = new StringBuilder();
+        StringBuilder temp = new StringBuilder();
+        for (int i = 0; i < hex.length() - 1; i += 2) {
+            String output = hex.substring(i, (i + 2));
+            int decimal = Integer.parseInt(output, 16);
+            sb.append((char) decimal);
+            temp.append(decimal);
         }
         return sb.toString();
     }
 
     /**
-     * 十六进制转十进制
-     * @param num
-     * @return
+     * 字节数组转16进制字符串 以空格分割
+     *
+     * @param bytes 字节数组
+     * @return 16进制字符串
      */
-    public static Integer get10HexNum(String num){
-        return Integer.parseInt(num,16);
-    }
-
-
-    /**
-     * 倒序字符串
-     * @param old
-     * @return
-     */
-    public static String reverseOrder(String old){
-        return new StringBuffer(old).reverse().toString();
+    public String bytesToHexString(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < bytes.length; i++) {
+            String hex = Integer.toHexString(bytes[i] & 0xFF);
+            if (hex.length() == 1) {
+                sb.append("0");
+            }
+            sb.append(hex.toUpperCase() + " ");
+        }
+        return sb.toString();
     }
 
 

@@ -18,6 +18,8 @@
 
 package io.github.spafka.flink;
 
+import java.math.BigDecimal;
+
 /**
  * Collection of simple mathematical routines.
  */
@@ -212,4 +214,55 @@ public final class MathUtils {
     public static long flipSignBit(long in) {
         return in ^ Long.MIN_VALUE;
     }
+
+    /**
+     * scale1
+     *
+     * @param f
+     * @return
+     */
+    public static float scale1(float f) {
+
+        BigDecimal b = new BigDecimal(f);
+        return b.setScale(1, BigDecimal.ROUND_HALF_UP).floatValue();
+
+    }
+
+    /**
+     * scale1
+     *
+     * @param f
+     * @return
+     */
+    public static double scale1(double f) {
+
+        BigDecimal b = new BigDecimal(f);
+        return b.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
+
+    }
+
+    /**
+     * @param f
+     * @param n
+     * @return
+     */
+    public static float scaleN(float f, int n) {
+
+        BigDecimal b = new BigDecimal(f);
+        return b.setScale(n, BigDecimal.ROUND_HALF_UP).floatValue();
+
+    }
+
+    /**
+     * @param f
+     * @param n
+     * @return
+     */
+    public static double scaleN(double f, int n) {
+
+        BigDecimal b = new BigDecimal(f);
+        return b.setScale(n, BigDecimal.ROUND_HALF_UP).doubleValue();
+
+    }
+
 }

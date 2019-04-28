@@ -247,6 +247,7 @@ public final class IOUtils {
 
     /**
      * Closes all elements in the iterable with closeQuietly().
+     * @param closeables
      */
     public static void closeAllQuietly(Iterable<? extends AutoCloseable> closeables) {
         if (null != closeables) {
@@ -262,6 +263,7 @@ public final class IOUtils {
      * Closes the given AutoCloseable.
      *
      * <p><b>Important:</b> This method is expected to never throw an exception.
+     * @param closeable
      */
     public static void closeQuietly(AutoCloseable closeable) {
         try {
