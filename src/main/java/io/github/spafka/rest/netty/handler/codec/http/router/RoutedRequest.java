@@ -5,7 +5,6 @@ import org.apache.flink.shaded.netty4.io.netty.handler.codec.http.QueryStringDec
 import org.apache.flink.shaded.netty4.io.netty.util.ReferenceCountUtil;
 import org.apache.flink.shaded.netty4.io.netty.util.ReferenceCounted;
 
-import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
