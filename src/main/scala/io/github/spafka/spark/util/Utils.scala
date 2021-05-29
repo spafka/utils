@@ -21,6 +21,7 @@ package io.github.spafka.spark.util
 
 import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
 
+
 /** CallSite represents a place in user code. It can have a short and a long form. */
 case class CallSite(shortForm: String, longForm: String)
 
@@ -30,6 +31,8 @@ object CallSite {
   val empty = CallSite("", "")
 }
 
+
+import io.github.spafka.spark.internal.Logging
 
 import java.io._
 import java.lang.management.ManagementFactory
@@ -41,9 +44,6 @@ import java.nio.file.Files
 import java.util.concurrent.TimeUnit.NANOSECONDS
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.{Locale, Random, UUID}
-
-import io.github.spafka.spark.internal.Logging
-
 import scala.collection.JavaConverters._
 import scala.collection.Map
 import scala.collection.mutable.ArrayBuffer
@@ -56,9 +56,9 @@ import scala.util.control.{ControlThrowable, NonFatal}
   */
 object Utils extends Logging {
 
-  import java.util
-
   import org.apache.commons.lang3.SystemUtils
+
+  import java.util
 
   val random = new Random()
 
@@ -297,8 +297,8 @@ object Utils extends Logging {
     val startTime = System.nanoTime()
     val result = body
     val endTime = System.nanoTime()
-    import sun.reflect.Reflection
-    logInfo(s"${Reflection.getCallerClass(2)} ${math.max(NANOSECONDS.toMillis(endTime - startTime), 0)} ms")
+
+    // logInfo(s"${Reflection.getCallerClass(2)} ${math.max(NANOSECONDS.toMillis(endTime - startTime), 0)} ms")
 
     result
   }
@@ -1226,13 +1226,25 @@ object Utils extends Logging {
     """]""").r
 
   /**
-    * Return the number of half widths in a given string. Note that a full width character
-    * occupies two half widths.
-    *
-    * For a string consisting of 1 million characters, the execution of this method requires
-    * about 50ms.
-    */
+   * Return the number of half widths in a given string. Note that a full width character
+   * occupies two half widths.
+   *
+   * For a string consisting of 1 million characters, the execution of this method requires
+   * about 50ms.
+   */
   def stringHalfWidth(str: String): Int = {
     if (str == null) 0 else str.length + fullWidthRegex.findAllIn(str).size
+  }
+
+  object TextBinder {
+
+
+    def main(args: Array[String]): Unit = {
+      val str = interpolate("$a=$a", Map("a" -> "a"))
+      print(str)
+    }
+
+    def interpolate(text: String, vars: Map[String, String]) =
+      (text /: vars) { (t, kv) => t.replace("${" + kv._1 + "}", kv._2) }
   }
 }
