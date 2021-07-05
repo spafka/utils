@@ -20,11 +20,9 @@ package io.github.spafka.hex;
 
 import com.google.common.base.Preconditions;
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 
-@Slf4j
 public class XorUtils {
     static BitAndByteUtil b2b = new BitAndByteUtil();
 
@@ -52,7 +50,6 @@ public class XorUtils {
 
         String s = sb.toString();
         if (s.length()%8!=0){
-            log.error("{} {} {} {} ",s1,s2,s,s.length());
         }
         return s ;
     }
@@ -81,11 +78,10 @@ public class XorUtils {
         String s1 = Arrays.stream(old).mapToObj(x -> b2b.byteToBit((byte) x)
         ).reduce((x, x2) -> x + x2).get();
 
-        log.debug(s1);
 
         String s2 = Arrays.stream(newz).mapToObj(x -> b2b.byteToBit((byte) x)
         ).reduce((x, x2) -> x + x2).get();
-        log.debug(s2);
+
         String s = xorAtFixPosit(s1, s2, poisition);
 
         byte[] bytes = cheng8bitString2Bytes(s);

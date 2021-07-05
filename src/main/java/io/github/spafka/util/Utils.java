@@ -1,15 +1,20 @@
 package io.github.spafka.util;
 
 import io.github.spafka.tuple.Tuple2;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.locks.Lock;
 import java.util.function.Supplier;
 
-@Slf4j
+
 public class Utils {
 
+    static final Logger log = LoggerFactory.getLogger(Utils.class);
+
+
     public <T> T timeTakeMS(Supplier<T> f, String... prefix) {
+
         long l = System.currentTimeMillis();
         T t = f.get();
         log.info("{} take {} ms", prefix, System.currentTimeMillis() - l);
