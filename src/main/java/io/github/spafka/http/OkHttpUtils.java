@@ -46,25 +46,33 @@ public class OkHttpUtils {
             .writeTimeout(20, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS).build();
 
+
+
     public static String doGet(String baseUrl, @NonNull HashMap<String, Object> param) throws IOException {
 
-        Iterator<Map.Entry<String, Object>> it = param.entrySet().iterator();
+        if (param!=null){
+            Iterator<Map.Entry<String, Object>> it = param.entrySet().iterator();
 
-        StringBuffer buffer = new StringBuffer();
-        while (it.hasNext()) {
-            Map.Entry<String, Object> entry = it.next();
-            Object key = entry.getKey();
-            buffer.append(key);
-            buffer.append('=');
-            Object value = entry.getValue();
-            buffer.append(value);
-            if (it.hasNext()) {
-                buffer.append("&");
+            StringBuffer buffer = new StringBuffer();
+            while (it.hasNext()) {
+                Map.Entry<String, Object> entry = it.next();
+                Object key = entry.getKey();
+                buffer.append(key);
+                buffer.append('=');
+                Object value = entry.getValue();
+                buffer.append(value);
+                if (it.hasNext()) {
+                    buffer.append("&");
+                }
             }
+
+            baseUrl=baseUrl+buffer;
+
         }
 
+
         Request request = new Request.Builder()
-                .url(baseUrl + buffer)
+                .url(baseUrl)
                 .build();
         String result = "";
         try {
@@ -83,7 +91,7 @@ public class OkHttpUtils {
     public static String doGet(String url) throws IOException {
 
 
-        return doGet(url, new HashMap<String, Object>());
+        return doGet(url, null);
     }
 
     public static void doGetAsync(String baseUrl, @NonNull HashMap<String, Object> param, @NonNull Callback callback) {
