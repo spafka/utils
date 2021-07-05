@@ -17,8 +17,8 @@
  **/
 package io.github.spafka.flink;
 
+import org.apache.commons.lang3.SystemUtils;
 
-import io.github.spafka.spark.util.Utils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -246,7 +246,7 @@ public final class FileUtils {
     }
 
     private static void guardIfWindows(ThrowingConsumer<File, IOException> toRun, File file) throws IOException {
-        if (!Utils.isWindows()) {
+        if (!SystemUtils.IS_OS_WINDOWS) {
             toRun.accept(file);
         } else {
             // for windows, we synchronize on a global lock, to prevent concurrent delete issues
