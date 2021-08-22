@@ -6,7 +6,7 @@
 
     <groupId>io.github.spafka</groupId>
     <artifactId>utils</artifactId>
-    <version>1.0.9</version>
+    <version>1.0.10</version>
 
     <name>spafka-common-utils</name>
     <description>utils sdk</description>
@@ -25,7 +25,7 @@
         <connection>scm:git:https://github.com/spafka/utils</connection>
         <developerConnection>scm:git:https://github.com/spafka/utils</developerConnection>
         <url>git@https://github.com/spafka/utils</url>
-        <tag>1.0.9</tag>
+        <tag>1.0.10</tag>
     </scm>
     <issueManagement>
         <system>GitHub Issues</system>
@@ -71,63 +71,73 @@
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
             <version>2.12.8</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-shaded-netty</artifactId>
             <version>4.1.32.Final-${flink.shaded.version}</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
             <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <version>${slf4j.version}</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jul-to-slf4j</artifactId>
             <version>${slf4j.version}</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
             <version>${slf4j.version}</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>${log4j.version}</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <version>${log4j2.version}</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
             <version>${log4j2.version}</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commons.lang3.version}</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
 
 
@@ -136,18 +146,22 @@
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
             <scope>compile</scope>
+
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>${okhttp.version}</version>
             <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>compile</scope>
+            <optional>true</optional>
         </dependency>
 
 
@@ -240,8 +254,8 @@
 
 
     <build>
-        <outputDirectory>target/scala-${scala.binary.version}/classes</outputDirectory>
-        <testOutputDirectory>target/scala-${scala.binary.version}/test-classes</testOutputDirectory>
+        <!--        <outputDirectory>target/scala-${scala.binary.version}/classes</outputDirectory>-->
+        <!--        <testOutputDirectory>target/scala-${scala.binary.version}/test-classes</testOutputDirectory>-->
         <plugins>
 
             <plugin>
@@ -255,9 +269,8 @@
                 <version>3.4.4</version>
 
                 <configuration>
-                    <recompileMode>incremental</recompileMode>
+                    <!--                    <recompileMode>incremental</recompileMode>-->
                     <args>
-                        <arg>-deprecation</arg>
                         <arg>-explaintypes</arg>
                         <arg>-unchecked</arg>
                         <arg>-deprecation</arg>
@@ -300,6 +313,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.0</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -318,74 +332,74 @@
             <!-- We use the maven-shade plugin to create a fat jar that contains all dependencies
             except flink and it's transitive dependencies. The resulting fat-jar can be executed
             on a cluster. Change the value of Program-Class if your program entry point changes. -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <executions>
+            <!--            <plugin>-->
+            <!--                <groupId>org.apache.maven.plugins</groupId>-->
+            <!--                <artifactId>maven-shade-plugin</artifactId>-->
+            <!--                <executions>-->
 
-                    <!-- Run shade goal on package phase -->
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <filters>
-                                <filter>
-                                    <artifact>org.apache.flink:*</artifact>
-                                    <excludes>
-                                        <!-- exclude shaded google but include shaded curator -->
-                                        <exclude>org/apache/flink/shaded/com/**</exclude>
-                                        <exclude>web-docs/**</exclude>
-                                    </excludes>
-                                </filter>
-                                <filter>
-                                    <!-- Do not copy the signatures in the META-INF folder.
-                                    Otherwise, this might cause SecurityExceptions when using the JAR. -->
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>log4j.properties</exclude>
-                                        <exclude>log4j-test.properties</exclude>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
+            <!--                    &lt;!&ndash; Run shade goal on package phase &ndash;&gt;-->
+            <!--                    <execution>-->
+            <!--                        <phase>package</phase>-->
+            <!--                        <goals>-->
+            <!--                            <goal>shade</goal>-->
+            <!--                        </goals>-->
+            <!--                        <configuration>-->
+            <!--                            <filters>-->
+            <!--                                <filter>-->
+            <!--                                    <artifact>org.apache.flink:*</artifact>-->
+            <!--                                    <excludes>-->
+            <!--                                        &lt;!&ndash; exclude shaded google but include shaded curator &ndash;&gt;-->
+            <!--                                        <exclude>org/apache/flink/shaded/com/**</exclude>-->
+            <!--                                        <exclude>web-docs/**</exclude>-->
+            <!--                                    </excludes>-->
+            <!--                                </filter>-->
+            <!--                                <filter>-->
+            <!--                                    &lt;!&ndash; Do not copy the signatures in the META-INF folder.-->
+            <!--                                    Otherwise, this might cause SecurityExceptions when using the JAR. &ndash;&gt;-->
+            <!--                                    <artifact>*:*</artifact>-->
+            <!--                                    <excludes>-->
+            <!--                                        <exclude>log4j.properties</exclude>-->
+            <!--                                        <exclude>log4j-test.properties</exclude>-->
+            <!--                                        <exclude>META-INF/*.SF</exclude>-->
+            <!--                                        <exclude>META-INF/*.DSA</exclude>-->
+            <!--                                        <exclude>META-INF/*.RSA</exclude>-->
+            <!--                                    </excludes>-->
+            <!--                                </filter>-->
+            <!--                            </filters>-->
 
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>fixme</mainClass>
-                                </transformer>
-                            </transformers>
+            <!--                            <transformers>-->
+            <!--                                <transformer-->
+            <!--                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
+            <!--                                    <mainClass>fixme</mainClass>-->
+            <!--                                </transformer>-->
+            <!--                            </transformers>-->
 
-                            <finalName>
-                                ${project.artifactId}-${project.version}-${timestamp}
-                            </finalName>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                        </configuration>
+            <!--                            <finalName>-->
+            <!--                                ${project.artifactId}-${project.version}-${timestamp}-->
+            <!--                            </finalName>-->
+            <!--                            <createDependencyReducedPom>false</createDependencyReducedPom>-->
+            <!--                        </configuration>-->
 
-                    </execution>
-                </executions>
-            </plugin>
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--            </plugin>-->
 
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-                <version>1.4</version>
-                <configuration>
-                    <timestampFormat>yyyy-MM-dd</timestampFormat>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>create-timestamp</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <inherited>false</inherited>
-            </plugin>
+            <!--            <plugin>-->
+            <!--                <groupId>org.codehaus.mojo</groupId>-->
+            <!--                <artifactId>buildnumber-maven-plugin</artifactId>-->
+            <!--                <version>1.4</version>-->
+            <!--                <configuration>-->
+            <!--                    <timestampFormat>yyyy-MM-dd</timestampFormat>-->
+            <!--                </configuration>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <goals>-->
+            <!--                            <goal>create-timestamp</goal>-->
+            <!--                        </goals>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--                <inherited>false</inherited>-->
+            <!--            </plugin>-->
 
         </plugins>
     </build>

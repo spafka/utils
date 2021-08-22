@@ -3,6 +3,9 @@ package io.guthub.spafka.test;
 import io.github.spafka.ds.SkipList;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class SkipLists {
@@ -28,6 +31,15 @@ public class SkipLists {
         concurrentSkipListMap.put(1,"3");
 
         System.out.println();
+    }
+
+
+    @Test
+    public void _3() throws IOException {
+
+        long count = Files.lines(new File("~/Desktop/authentication-integration 2.log").toPath()).filter(x -> x.contains("/service-api/auth/v1/user?companyId=1000&userName=sch")).count();
+
+        System.out.println(count);
     }
 
 
