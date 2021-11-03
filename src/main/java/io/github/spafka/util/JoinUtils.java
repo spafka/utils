@@ -169,7 +169,7 @@ public class JoinUtils {
                                                   @NonNull Comparator<R> com2,
                                                   @NonNull BiCompare<L, R> biCompare,
                                                   @NonNull BiFunction<L, R, U> function) {
-        return sortJoinInternal(left, right, com1, com2, biCompare, function, JOINTYPE.INNER_JOIN);
+        return sortJoinInternal(left, right, com1, com2, biCompare, function, JOINTYPE.RIGHT_JOIN);
 
     }
 
@@ -179,7 +179,7 @@ public class JoinUtils {
                                                   @NonNull Comparator<R> com2,
                                                   @NonNull BiCompare<L, R> biCompare,
                                                   @NonNull BiFunction<L, R, U> function) {
-        return sortJoinInternal(left, right, com1, com2, biCompare, function, JOINTYPE.RIGHT_JOIN);
+        return sortJoinInternal(left, right, com1, com2, biCompare, function, JOINTYPE.INNER_JOIN);
 
     }
 
